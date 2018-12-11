@@ -1,0 +1,30 @@
+language: java
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+script:
+- "./gradlew build"
+deploy:
+- provider: script
+  script: "./gradlew bintrayUpload"
+  skip_cleanup: true
+  on:
+    repo: hmcts/sscs-robotics-common
+    tags: true
+- provider: releases
+  api_key:
+    secure: QH00js7Zv0tXIPzKvZPSnDsUeKxoMEKpU/47+7NnaTavaJ5O4lV20cQRP8asCxtRrPjNE7fJkunjhMJWXe5XFOpbCUuM5mC/D0H0Pvw5KzWm2VOnzvwBSbi6t1vDW3I0EdV5QJJHBq0Kplq26wL9w6Xq4wDy1gCAf+/csgE/glrMpgq+DPKXHX/SWzSnAbdcrB9EVEHaLWbssXWsM6XPc53kxPQuExAC1jg7KYzd2YpwtWPo4NBaddbVnBCBNS6Pz+y2D/O5G7onnj3TgB47JeF2YK0trpHt1s2MWbbGjmZ5h9c5tshQjY8fKVV7mD6+DELmzylvKnAa26HVx0uvxeJABfgEC95Zcp6ntE2hVMsyIUM4YoRFxgQ55JhAD0BR6WfCxFNGvnOefHRsDXSjfGgPsZSK/ubdtOGKsHYJC68mHsZ3f/v2XYVv4Df8to/ykez3C+PI9QX1VMCKkdUaD2IhvqH4C6FfHS2iwxPEsqJ98Ibj1TFGVJnpfQZCViJ2Q1BxAV6R1sjn+IFzPPPmZoXoZHRYGI+IZoWd7CsUNHpvDZrbBuTnbVuAiqoz6ovVQwOxbM3e5i7BiyZD4rbCUkADnmt/uVAbdoVqGopiEu1wSZg5yJlymbzMx//+m8ApAbSXoFe22pO/Ghxriys5JnGOrxGpxoOmzm5/Qd6WJ5k=
+  file: build/libs/sscs-robotics-common-*.jar
+  file_glob: true
+  skip_cleanup: true
+  on:
+    repo: hmcts/sscs-robotics-common
+    tags: true
+env:
+  global:
+  - secure: eLJiMGXnkPxuh1OvDX1jQNqNc/587a0Zuu26sMLOwfN2h3VTlkz9hu7b0T4qIdgTHVfpzL37Cd+hIhAx/PIMe/vkJuNuC6aTs1g8cOGpUH0yqeHsHe3SHxr2UMOdWMRR3iXKAftSkdFCIhto5fmo/8w7Hg3m1n1NKN+3O6IDXe3sPDjiFMD86FAIE5LkewChMYiISIA1RZLXpjSG4LlwA/d94UIKJ4jtwKF621Qm3EEE9AnahPiH2ouzBy+IYcm1/3TZZimbCvUjbU4CiTFAwO2yRMiKpZN2MrpbOUfElE6qO6CiMIhM8iiXKwd9g6CgFqfHbt3l18r0JW+nWGOjhEZTSuCkIzlQTGG6FXpp60AkFkK1FcAtGzEitLnGnF2tefVPAYFhlMak4ECD07+Tb66k2QG5CYoDXn7roBJxq027+/KAF/baS3L1kh4IHZCUTH0dvh0n9s4Jx2irdgjDI3lD0qFkGSamTFQ/5lVqKLKha+sFQ4dI/FKq8IY+dtR0oxBNzvKrlFRtafI4dHJvtQeDw3lEkzqABL88Y5rRkHfm7Vh0LBHVlauwdsKbw0q5XRzcdKk7Tfw782aBEjQLYvFDjcPy58iazSHUe07NhsQDFrgjwz4CySglqp8y1eiRfZlpcbV8CDxk/8e+JjX9R5eCn78smN05wVgnSd7b6JU=
+  - secure: kTw4Uuo2cJez05adlz5E9mHUw7Xx67ZELZvihbjRI0sfBjAiZpjwShope694aoN9hGD4g+T7DhncoQ6P57Hf1kRuSvlvWVzYZvaQDOac4Lnqj5eg/swsYyaVcWUT4RkMSnteLm5PVPto1E5KwuY9RK2y8AtK3BXW1QdHfE9Jzv6lJ/CpKu6uhRO9H4F5x4fKBXJVLjdjl6cssaxociGhNjQUTieNKByruEfL5i2rJONGC//9go8qEyn7SuAn17FwXlouX7OjsWOLBJd1QtDTTBkGTLW8m8WeEjF58weIa6YjjVq8bwDJJGpGhvT84xUE+j+G1Sb89FD6oW/zH0KrZU/RKKIfIL8OBh9pCCnQopBSYNqOPdaszCAwpK3/u2iWKl8Ue8kt53i3mIMTiI7ZSFuLiPoR43o1IRE/XMaGlVzSrNc06NK1BK+8obSBbZsNBaQXM0AyAI2Jb31/qkrMB20Hui4Jk/erjM0zl2+7cF1FADletJwkCfuETQMX76UOIqJBGrwK6OaC6mxbi56ffan90Hujv+QbHtyFpC4E48aXX54pCTwnRjEqAAYzF9b8USyLFvLDAqgzn5MpU9Vsb0j31eKsYZLL2XzGmssd1VZkR6jYoQLCy27379R6BYkNHM8FQoHddrbSgkpIjz4CM7DdOVlnKJEBfXGzHuv/zNY=
