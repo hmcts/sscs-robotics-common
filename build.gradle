@@ -1,0 +1,123 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'checkstyle'
+    id 'pmd'
+    id 'jacoco'
+    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+    id 'maven'
+}
+
+def buildNumber = System.getenv("TRAVIS_BRANCH") ?: "DEV-SNAPSHOT"
+
+group 'uk.gov.hmcts.reform'
+// Do not change this version number
+version buildNumber
+
+sourceCompatibility = 1.8
+
+repositories {
+    
+    mavenLocal()
+
+    maven {
+        url "https://dl.bintray.com/hmcts/hmcts-maven"
+    }
+
+    maven {
+        url 'https://repo.spring.io/libs-milestone'
+    }
+
+    jcenter()
+    mavenCentral()
+
+    // jitpack should be last resort
+    // see: https://github.com/jitpack/jitpack.io/issues/1939
+    maven { url 'https://jitpack.io' }
+}
+
+// region static code analysis
+
+checkstyle {
+    maxWarnings = 0
+    toolVersion = '8.10.1'
+    // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
+    configDir = new File(rootDir, 'config/checkstyle')
+}
+
+pmd {
+    toolVersion = "6.5.0"
+    ignoreFailures = true
+    sourceSets = [sourceSets.main, sourceSets.test]
+    reportsDir = file("$project.buildDir/reports/pmd")
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        csv.enabled = false
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        Main(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId project.group
+            artifactId 'sscs-robotics-common'
+            version project.version
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['Main']
+    publish = true
+    pkg {
+        repo = 'hmcts-maven'
+        name = 'sscs-robotics-common'
+        userOrg = 'hmcts'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/hmcts/sscs-robotics-common'
+        version {
+            name = project.version
+        }
+    }
+}
+
+dependencies {
+    compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: '3.0.1'
+    compile group: 'org.springframework', name: 'spring-context-support', version: '5.1.1.RELEASE'
+    compile group: 'org.springframework', name: 'spring-web', version: '5.1.1.RELEASE'
+    compile group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.9.2'
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    compile group: 'uk.gov.hmcts.reform', name: 'sscs-pdf-robotics-email-common', version: '0.0.93'
+    
+    compileOnly 'org.projectlombok:lombok:1.16.20'
+
+    testCompile group: 'junit', name: 'junit', version: 4.12
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.2.7'
+    testCompile 'pl.pragmatists:JUnitParams:1.1.1'
+}
