@@ -31,6 +31,7 @@ repositories {
     }
 
     jcenter()
+    
     mavenCentral()
 
     // jitpack should be last resort
@@ -121,3 +122,4 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.2.7'
     testCompile 'pl.pragmatists:JUnitParams:1.1.1'
 }
+
