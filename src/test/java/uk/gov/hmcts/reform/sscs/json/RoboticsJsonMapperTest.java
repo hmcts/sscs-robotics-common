@@ -1,26 +1,34 @@
 package uk.gov.hmcts.reform.sscs.json;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.Assert;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
 import uk.gov.hmcts.reform.sscs.ccd.domain.DateRange;
 import uk.gov.hmcts.reform.sscs.ccd.domain.ExcludeDate;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Name;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
+@RunWith(JUnitParamsRunner.class)
 public class RoboticsJsonMapperTest {
     private RoboticsJsonMapper roboticsJsonMapper = new RoboticsJsonMapper();
     private RoboticsWrapper appeal;
-    private RoboticsJsonValidator roboticsJsonValidator = new RoboticsJsonValidator("/schema/sscs-robotics.json");
+    private RoboticsJsonValidator roboticsJsonValidator = new RoboticsJsonValidator(
+            "/schema/sscs-robotics.json");
+    private JSONObject roboticsJson;
 
     @Before
     public void setup() {
@@ -33,13 +41,13 @@ public class RoboticsJsonMapperTest {
 
     @Test
     public void mapsAppealToRoboticsJson() {
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         roboticsJsonValidator.validate(roboticsJson);
 
         assertEquals(
-            "If this fails, add an assertion below, do not just increment the number :)", 14,
-            roboticsJson.length()
+                "If this fails, add an assertion below, do not just increment the number :)", 14,
+                roboticsJson.length()
         );
 
         assertEquals("002DD", roboticsJson.get("caseCode"));
@@ -55,8 +63,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("Yes", roboticsJson.get("evidencePresent"));
 
         assertEquals(
-            "If this fails, add an assertion below, do not just increment the number :)", 10,
-            roboticsJson.getJSONObject("appellant").length()
+                "If this fails, add an assertion below, do not just increment the number :)", 10,
+                roboticsJson.getJSONObject("appellant").length()
         );
 
         assertEquals("Mr", roboticsJson.getJSONObject("appellant").get("title"));
@@ -71,8 +79,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("mail@email.com", roboticsJson.getJSONObject("appellant").get("email"));
 
         assertEquals(
-            "If this fails, add an assertion, do not just increment the number :)", 11,
-            roboticsJson.getJSONObject("representative").length()
+                "If this fails, add an assertion, do not just increment the number :)", 11,
+                roboticsJson.getJSONObject("representative").length()
         );
 
         assertEquals("Mrs", roboticsJson.getJSONObject("representative").get("title"));
@@ -88,8 +96,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("mail@email.com", roboticsJson.getJSONObject("representative").get("email"));
 
         assertEquals(
-            "If this fails, add an assertion below, do not just increment the number :)", 6,
-            roboticsJson.getJSONObject("hearingArrangements").length()
+                "If this fails, add an assertion below, do not just increment the number :)", 6,
+                roboticsJson.getJSONObject("hearingArrangements").length()
         );
 
         assertEquals("Spanish", roboticsJson.getJSONObject("hearingArrangements").get("languageInterpreter"));
@@ -107,16 +115,26 @@ public class RoboticsJsonMapperTest {
     public void mapRepTitleToDefaultValuesWhenSetToNull() {
         appeal.getSscsCaseData().getAppeal().getRep().getName().setTitle(null);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals("s/m", roboticsJson.getJSONObject("representative").get("title"));
+    }
+
+    @Test
+    @Parameters({"PIP, 002DD", "ESA, 051DD", "null, 002DD", ", 002DD"})
+    public void givenBenefitType_shouldMapCaseCodeAccordingly(String benefitCode, String expectedCaseCode) {
+        appeal.getSscsCaseData().getAppeal().getBenefitType().setCode(benefitCode);
+
+        roboticsJson = roboticsJsonMapper.map(appeal);
+
+        assertThat(roboticsJson.get("caseCode"), is(expectedCaseCode));
     }
 
     @Test
     public void mapRepFirstNameToDefaultValuesWhenSetToNull() {
         appeal.getSscsCaseData().getAppeal().getRep().getName().setFirstName(null);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals(".", roboticsJson.getJSONObject("representative").get("firstName"));
     }
@@ -125,7 +143,7 @@ public class RoboticsJsonMapperTest {
     public void mapRepLastNameToDefaultValuesWhenSetToNull() {
         appeal.getSscsCaseData().getAppeal().getRep().getName().setLastName(null);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals(".", roboticsJson.getJSONObject("representative").get("lastName"));
     }
@@ -135,7 +153,7 @@ public class RoboticsJsonMapperTest {
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguages("My Language");
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguageInterpreter("Yes");
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals("My Language", roboticsJson.getJSONObject("hearingArrangements").get("languageInterpreter"));
     }
@@ -153,7 +171,7 @@ public class RoboticsJsonMapperTest {
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(null);
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setExcludeDates(excludeDates);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals("No", roboticsJson.getJSONObject("hearingArrangements").get("hearingLoop"));
         assertEquals("No", roboticsJson.getJSONObject("hearingArrangements").get("accessibleHearingRoom"));
@@ -165,7 +183,7 @@ public class RoboticsJsonMapperTest {
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguages("My Language");
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguageInterpreter("No");
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.getJSONObject("hearingArrangements").has("languageInterpreter"));
     }
@@ -175,7 +193,7 @@ public class RoboticsJsonMapperTest {
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguages(null);
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguageInterpreter("Yes");
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.getJSONObject("hearingArrangements").has("languageInterpreter"));
     }
@@ -187,7 +205,7 @@ public class RoboticsJsonMapperTest {
         arrangements.add("signLanguageInterpreter");
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(arrangements);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertEquals("My Language", roboticsJson.getJSONObject("hearingArrangements").get("signLanguageInterpreter"));
     }
@@ -198,7 +216,7 @@ public class RoboticsJsonMapperTest {
         List<String> arrangements = new ArrayList<>();
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(arrangements);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.getJSONObject("hearingArrangements").has("signLanguageInterpreter"));
     }
@@ -210,7 +228,7 @@ public class RoboticsJsonMapperTest {
         arrangements.add("signLanguageInterpreter");
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(arrangements);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.getJSONObject("hearingArrangements").has("signLanguageInterpreter"));
     }
@@ -219,7 +237,7 @@ public class RoboticsJsonMapperTest {
     public void givenCcdCaseIdIsNull_thenDoNotSetCcdCaseId() {
         appeal.setCcdCaseId(null);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         roboticsJsonValidator.validate(roboticsJson);
 
@@ -233,7 +251,7 @@ public class RoboticsJsonMapperTest {
         appeal.getSscsCaseData().getAppeal().getRep().setOrganisation(null);
         appeal.getSscsCaseData().getAppeal().getRep().setHasRepresentative("No");
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.has("representative"));
     }
@@ -243,16 +261,16 @@ public class RoboticsJsonMapperTest {
         Name appointeeName = Name.builder().title("Mrs").firstName("Ap").lastName("Pointee").build();
 
         Appointee appointee = Appointee.builder()
-            .name(appointeeName)
-            .address(appeal.getSscsCaseData().getAppeal().getAppellant().getAddress())
-            .contact(appeal.getSscsCaseData().getAppeal().getAppellant().getContact())
-            .build();
+                .name(appointeeName)
+                .address(appeal.getSscsCaseData().getAppeal().getAppellant().getAddress())
+                .contact(appeal.getSscsCaseData().getAppeal().getAppellant().getContact())
+                .build();
 
         appeal.getSscsCaseData().getAppeal().getAppellant().setIsAddressSameAsAppointee("Yes");
 
         appeal.getSscsCaseData().getAppeal().getAppellant().setAppointee(appointee);
 
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         Assert.assertTrue(roboticsJson.has("appointee"));
         assertEquals("Yes", roboticsJson.getJSONObject("appointee").getString("sameAddressAsAppellant"));
@@ -260,7 +278,7 @@ public class RoboticsJsonMapperTest {
 
     @Test
     public void givenNoAppointee_thenProcessRobotics() {
-        JSONObject roboticsJson = roboticsJsonMapper.map(appeal);
+        roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.has("appointee"));
     }

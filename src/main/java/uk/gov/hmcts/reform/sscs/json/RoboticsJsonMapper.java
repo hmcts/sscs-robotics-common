@@ -2,25 +2,36 @@ package uk.gov.hmcts.reform.sscs.json;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sscs.ccd.domain.*;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appeal;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appellant;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Contact;
+import uk.gov.hmcts.reform.sscs.ccd.domain.ExcludeDate;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOptions;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Representative;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
 @Component
 public class RoboticsJsonMapper {
 
     private static final String YES = "Yes";
+    private static final String ESA_CASE_CODE = "051DD";
+    private static final String PIP_CASE_CODE = "002DD";
 
-    public JSONObject map(RoboticsWrapper wrapper) {
+    public JSONObject map(RoboticsWrapper roboticsWrapper) {
 
-        SscsCaseData sscsCaseData = wrapper.getSscsCaseData();
+        SscsCaseData sscsCaseData = roboticsWrapper.getSscsCaseData();
 
-        JSONObject obj = buildAppealDetails(new JSONObject(), sscsCaseData.getAppeal(), wrapper.getVenueName());
+        JSONObject obj = buildAppealDetails(new JSONObject(), sscsCaseData.getAppeal(), roboticsWrapper.getVenueName());
 
-        obj.put("caseId", wrapper.getCcdCaseId());
-        obj.put("evidencePresent", wrapper.getEvidencePresent());
+        obj.put("caseId", roboticsWrapper.getCcdCaseId());
+        obj.put("evidencePresent", roboticsWrapper.getEvidencePresent());
 
         if (null != sscsCaseData.getAppeal().getAppellant().getAppointee()) {
             Boolean sameAddressAsAppointee = "Yes".equalsIgnoreCase(sscsCaseData.getAppeal().getAppellant().getIsAddressSameAsAppointee());
@@ -44,7 +55,7 @@ public class RoboticsJsonMapper {
     }
 
     private static JSONObject buildAppealDetails(JSONObject obj, Appeal appeal, String venueName) {
-        obj.put("caseCode", "002DD");
+        obj.put("caseCode", getCaseCode(appeal.getBenefitType().getCode()));
         obj.put("appellantNino", appeal.getAppellant().getIdentity().getNino());
         obj.put("appellantPostCode", venueName);
         obj.put("appealDate", LocalDate.now().toString());
@@ -69,6 +80,13 @@ public class RoboticsJsonMapper {
         }
 
         return obj;
+    }
+
+    private static String getCaseCode(String code) {
+        if (StringUtils.equalsIgnoreCase("esa", code)) {
+            return ESA_CASE_CODE;
+        }
+        return PIP_CASE_CODE;
     }
 
     private static JSONObject buildAppellantDetails(Appellant appellant) {
@@ -138,7 +156,7 @@ public class RoboticsJsonMapper {
         }
 
         if (hearingOptions.getExcludeDates() != null
-            && hearingOptions.getExcludeDates().size() > 0) {
+                && hearingOptions.getExcludeDates().size() > 0) {
             JSONArray datesCantAttendArray = new JSONArray();
             for (ExcludeDate a : hearingOptions.getExcludeDates()) {
                 // Assume start and end date are always the same
