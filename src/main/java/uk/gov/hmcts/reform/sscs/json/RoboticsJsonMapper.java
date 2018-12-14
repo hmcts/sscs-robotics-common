@@ -83,7 +83,7 @@ public class RoboticsJsonMapper {
     }
 
     private static String getCaseCode(String code) {
-        if (StringUtils.lowerCase(code).equals("esa")) {
+        if (StringUtils.equalsIgnoreCase("esa", code)) {
             return ESA_CASE_CODE;
         }
         return PIP_CASE_CODE;
