@@ -16,10 +16,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
-import uk.gov.hmcts.reform.sscs.ccd.domain.DateRange;
-import uk.gov.hmcts.reform.sscs.ccd.domain.ExcludeDate;
-import uk.gov.hmcts.reform.sscs.ccd.domain.Name;
+import uk.gov.hmcts.reform.sscs.ccd.domain.*;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
 @RunWith(JUnitParamsRunner.class)
@@ -275,6 +272,25 @@ public class RoboticsJsonMapperTest {
         Assert.assertTrue(roboticsJson.has("appointee"));
         assertEquals("Yes", roboticsJson.getJSONObject("appointee").getString("sameAddressAsAppellant"));
     }
+
+    @Test
+    public void givenAnAppointeeWithEmptyDetails_thenProcessRobotics() {
+        Name appointeeName = Name.builder().title(null).firstName(null).lastName(null).build();
+
+        Appointee appointee = Appointee.builder()
+                .name(appointeeName)
+                .address(Address.builder().line1(null).line2(null).town(null).county(null).postcode(null).build())
+                .contact(Contact.builder().email(null).phone(null).mobile(null).build())
+                .identity(Identity.builder().dob(null).nino(null).build())
+                .build();
+
+        appeal.getSscsCaseData().getAppeal().getAppellant().setAppointee(appointee);
+
+        roboticsJson = roboticsJsonMapper.map(appeal);
+
+        assertFalse(roboticsJson.has("appointee"));
+    }
+
 
     @Test
     public void givenNoAppointee_thenProcessRobotics() {
