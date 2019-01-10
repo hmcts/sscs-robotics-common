@@ -161,4 +161,22 @@ public class RoboticsServiceTest {
         verify(roboticsJsonValidator).validate(mappedJson);
         verify(emailService).sendEmail(any());
     }
+
+    @Test
+    public void generatingRoboticsStoresTheJson() {
+
+        SscsCaseData appeal = buildCaseData();
+
+        JSONObject mappedJson = mock(JSONObject.class);
+
+        given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
+
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+
+        given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
+
+        service.sendCaseToRobotics(appeal, 123L, "AB12 XYZ", null);
+
+        assertThat(service.getRoboticsJson(), is(mappedJson));
+    }
 }
