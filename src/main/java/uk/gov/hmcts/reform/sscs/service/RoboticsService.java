@@ -28,6 +28,8 @@ public class RoboticsService {
     private final RoboticsJsonValidator roboticsJsonValidator;
     private final RoboticsEmailTemplate roboticsEmailTemplate;
 
+    private JSONObject roboticsJson;
+
     @Autowired
     public RoboticsService(
             AirLookupService airLookupService,
@@ -50,7 +52,7 @@ public class RoboticsService {
     public void sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf, Map<String, byte[]> additionalEvidence) {
         String venue = airLookupService.lookupAirVenueNameByPostCode(postcode);
 
-        JSONObject roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
+        roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
                 .ccdCaseId(caseId).venueName(venue).evidencePresent(caseData.getEvidencePresent()).build());
 
         sendJsonByEmail(caseData.getAppeal().getAppellant(), roboticsJson, pdf, additionalEvidence);
@@ -95,6 +97,10 @@ public class RoboticsService {
         }
 
         return emailAttachments;
+    }
+
+    public JSONObject getRoboticsJson() {
+        return roboticsJson;
     }
 
 }
