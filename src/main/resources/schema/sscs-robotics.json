@@ -20,6 +20,7 @@
     },
     "hearingRequestParty": {"type" : "string"},
     "pipNumber" : {"type" : "string"},
+    "receivedVia" : {"type" : "string"},
     "appellant": {"$ref": "#/definitions/person"},
     "appointee": {"$ref": "#/definitions/person"},
     "representative": {"$ref": "#/definitions/person"},
