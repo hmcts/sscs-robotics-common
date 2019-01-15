@@ -43,7 +43,7 @@ public class RoboticsJsonMapperTest {
         roboticsJsonValidator.validate(roboticsJson);
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 14,
+                "If this fails, add an assertion below, do not just increment the number :)", 15,
                 roboticsJson.length()
         );
 
@@ -58,6 +58,7 @@ public class RoboticsJsonMapperTest {
         assertEquals("Oral", roboticsJson.get("hearingType"));
         assertEquals("Mr User Test", roboticsJson.get("hearingRequestParty"));
         assertEquals("Yes", roboticsJson.get("evidencePresent"));
+        assertEquals("Online", roboticsJson.get("receivedVia"));
 
         assertEquals(
                 "If this fails, add an assertion below, do not just increment the number :)", 10,
