@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appellant;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.domain.email.EmailAttachment;
 import uk.gov.hmcts.reform.sscs.domain.email.RoboticsEmailTemplate;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
+import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonMapper;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonValidator;
 
@@ -27,6 +29,7 @@ public class RoboticsService {
     private final RoboticsJsonMapper roboticsJsonMapper;
     private final RoboticsJsonValidator roboticsJsonValidator;
     private final RoboticsEmailTemplate roboticsEmailTemplate;
+    private final RoboticsJsonUploadService roboticsJsonUploadService;
 
     private JSONObject roboticsJson;
 
@@ -36,13 +39,15 @@ public class RoboticsService {
             EmailService emailService,
             RoboticsJsonMapper roboticsJsonMapper,
             RoboticsJsonValidator roboticsJsonValidator,
-            RoboticsEmailTemplate roboticsEmailTemplate
+            RoboticsEmailTemplate roboticsEmailTemplate,
+            RoboticsJsonUploadService roboticsJsonUploadService
     ) {
         this.airLookupService = airLookupService;
         this.emailService = emailService;
         this.roboticsJsonMapper = roboticsJsonMapper;
         this.roboticsJsonValidator = roboticsJsonValidator;
         this.roboticsEmailTemplate = roboticsEmailTemplate;
+        this.roboticsJsonUploadService = roboticsJsonUploadService;
     }
 
     public void sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf) {
@@ -67,6 +72,25 @@ public class RoboticsService {
         roboticsJsonValidator.validate(roboticsAppeal);
 
         return roboticsAppeal;
+    }
+
+    public void attachRoboticsJsonToCaseInCcd(SscsCaseData caseData,
+                                              IdamTokens idamTokens, SscsCaseDetails caseDetails) {
+
+        log.info("Sending case {} to Robotics", caseDetails.getId());
+
+        if (caseDetails.getId() == null) {
+            log.info("CCD caseId is empty - skipping step to update CCD with Robotics JSON");
+        } else {
+            log.info("CCD caseId is {}, proceeding to update case with Robotics JSON", caseDetails.getId());
+            caseData.setCcdCaseId(caseDetails.getId().toString());
+            roboticsJsonUploadService
+                    .updateCaseWithRoboticsJson(getRoboticsJson(), caseData, caseDetails, idamTokens);
+        }
+    }
+
+    public JSONObject getRoboticsJson() {
+        return roboticsJson;
     }
 
     private void sendJsonByEmail(Appellant appellant, JSONObject json, byte[] pdf, Map<String, byte[]> additionalEvidence) {
@@ -97,10 +121,6 @@ public class RoboticsService {
         }
 
         return emailAttachments;
-    }
-
-    public JSONObject getRoboticsJson() {
-        return roboticsJson;
     }
 
 }
