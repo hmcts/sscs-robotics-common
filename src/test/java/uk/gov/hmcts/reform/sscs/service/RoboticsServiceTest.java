@@ -43,6 +43,9 @@ public class RoboticsServiceTest {
     @Mock
     private RoboticsEmailTemplate roboticsEmailTemplate;
 
+    @Mock
+    private RoboticsJsonUploadService roboticsJsonUploadService;
+
     private RoboticsService service;
 
     @Captor
@@ -52,7 +55,13 @@ public class RoboticsServiceTest {
     public void setup() {
         initMocks(this);
 
-        service = new RoboticsService(airlookupService, emailService, roboticsJsonMapper, roboticsJsonValidator, roboticsEmailTemplate);
+        service = new RoboticsService(
+                airlookupService,
+                emailService,
+                roboticsJsonMapper,
+                roboticsJsonValidator,
+                roboticsEmailTemplate,
+                roboticsJsonUploadService);
     }
 
     @Test

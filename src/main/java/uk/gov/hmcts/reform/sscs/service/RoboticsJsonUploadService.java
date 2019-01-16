@@ -74,7 +74,7 @@ public class RoboticsJsonUploadService {
 
     }
 
-    public SscsCaseData attachRoboticsJsonToCaseData(SscsCaseData caseData, UploadResponse uploadResponse) {
+    private SscsCaseData attachRoboticsJsonToCaseData(SscsCaseData caseData, UploadResponse uploadResponse) {
         DocumentLink documentLink = getDocumentLink(uploadResponse);
 
         if (null != documentLink) {
@@ -92,6 +92,20 @@ public class RoboticsJsonUploadService {
 
         return null;
 
+    }
+
+    private UploadResponse uploadRoboticsJson(List<MultipartFile> files) {
+
+        String serviceAuthorization = authTokenGenerator.generate();
+
+        try {
+            return documentUploadClientApi
+                    .upload(S2S_TOKEN, serviceAuthorization, DM_STORE_USER_ID, files);
+        } catch (Exception e) {
+            log.info("Doc Store service failed to upload Robotics JSON, but carrying on", e);
+        }
+
+        return null;
     }
 
     private SscsDocument getRoboticsJsonDocument(DocumentLink documentLink) {
@@ -125,19 +139,4 @@ public class RoboticsJsonUploadService {
         }
         return sscsDocumentList;
     }
-
-    public UploadResponse uploadRoboticsJson(List<MultipartFile> files) {
-
-        String serviceAuthorization = authTokenGenerator.generate();
-
-        try {
-            return documentUploadClientApi
-                    .upload(S2S_TOKEN, serviceAuthorization, DM_STORE_USER_ID, files);
-        } catch (Exception e) {
-            log.info("Doc Store service failed to upload Robotics JSON, but carrying on", e);
-        }
-
-        return null;
-    }
-
 }
