@@ -120,7 +120,7 @@ public class RoboticsJsonUploadService {
 
     private DocumentLink getDocumentLink(UploadResponse uploadResponse) {
         if (null != uploadResponse) {
-            final String href = uploadResponse.getEmbedded().getDocuments().get(0).links.binary.href;
+            final String href = uploadResponse.getEmbedded().getDocuments().get(0).links.self.href;
             return DocumentLink.builder().documentUrl(href).build();
         } else {
             log.info("No document link available - document store may be down");
