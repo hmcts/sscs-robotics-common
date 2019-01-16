@@ -51,6 +51,7 @@ public class RoboticsJsonMapper {
         obj.put("appellantNino", appeal.getAppellant().getIdentity().getNino());
         obj.put("appellantPostCode", venueName);
         obj.put("appealDate", LocalDate.now().toString());
+        obj.put("receivedVia", appeal.getReceivedVia());
 
         if (appeal.getMrnDetails() != null) {
             if (appeal.getMrnDetails().getMrnDate() != null) {
