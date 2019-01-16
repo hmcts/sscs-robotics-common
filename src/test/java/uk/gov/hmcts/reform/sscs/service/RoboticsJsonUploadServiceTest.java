@@ -1,39 +1,26 @@
 package uk.gov.hmcts.reform.sscs.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.*;
 
 import java.util.Collections;
-import java.util.List;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.web.client.RestClientException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.document.DocumentUploadClientApi;
 import uk.gov.hmcts.reform.document.domain.Document;
 import uk.gov.hmcts.reform.document.domain.UploadResponse;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.CcdService;
-import uk.gov.hmcts.reform.sscs.domain.email.EmailAttachment;
-import uk.gov.hmcts.reform.sscs.domain.email.RoboticsEmailTemplate;
-import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
-import uk.gov.hmcts.reform.sscs.json.RoboticsJsonMapper;
-import uk.gov.hmcts.reform.sscs.json.RoboticsJsonValidator;
 
 public class RoboticsJsonUploadServiceTest {
 
