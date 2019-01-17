@@ -31,8 +31,6 @@ public class RoboticsService {
     private final RoboticsEmailTemplate roboticsEmailTemplate;
     private final RoboticsJsonUploadService roboticsJsonUploadService;
 
-    private JSONObject roboticsJson;
-
     @Autowired
     public RoboticsService(
             AirLookupService airLookupService,
@@ -50,19 +48,21 @@ public class RoboticsService {
         this.roboticsJsonUploadService = roboticsJsonUploadService;
     }
 
-    public void sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf) {
-        sendCaseToRobotics(caseData, caseId, postcode, pdf, Collections.emptyMap());
+    public JSONObject sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf) {
+        return sendCaseToRobotics(caseData, caseId, postcode, pdf, Collections.emptyMap());
     }
 
-    public void sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf, Map<String, byte[]> additionalEvidence) {
+    public JSONObject sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf, Map<String, byte[]> additionalEvidence) {
         String venue = airLookupService.lookupAirVenueNameByPostCode(postcode);
 
-        roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
+        JSONObject roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
                 .ccdCaseId(caseId).venueName(venue).evidencePresent(caseData.getEvidencePresent()).build());
 
         sendJsonByEmail(caseData.getAppeal().getAppellant(), roboticsJson, pdf, additionalEvidence);
         log.info("Robotics email sent successfully for caseId {} and Nino {} and benefit type {}", caseId, caseData.getAppeal().getAppellant().getIdentity().getNino(),
                 caseData.getAppeal().getBenefitType().getCode());
+
+        return roboticsJson;
     }
 
     public JSONObject createRobotics(RoboticsWrapper appeal) {
@@ -74,7 +74,7 @@ public class RoboticsService {
         return roboticsAppeal;
     }
 
-    public void attachRoboticsJsonToCaseInCcd(SscsCaseData caseData,
+    public void attachRoboticsJsonToCaseInCcd(JSONObject roboticsJson, SscsCaseData caseData,
                                               IdamTokens idamTokens, SscsCaseDetails caseDetails) {
 
         log.info("Sending case {} to Robotics", caseDetails.getId());
@@ -85,12 +85,8 @@ public class RoboticsService {
             log.info("CCD caseId is {}, proceeding to update case with Robotics JSON", caseDetails.getId());
             caseData.setCcdCaseId(caseDetails.getId().toString());
             roboticsJsonUploadService
-                    .updateCaseWithRoboticsJson(getRoboticsJson(), caseData, caseDetails, idamTokens);
+                    .updateCaseWithRoboticsJson(roboticsJson, caseData, caseDetails, idamTokens);
         }
-    }
-
-    public JSONObject getRoboticsJson() {
-        return roboticsJson;
     }
 
     private void sendJsonByEmail(Appellant appellant, JSONObject json, byte[] pdf, Map<String, byte[]> additionalEvidence) {
