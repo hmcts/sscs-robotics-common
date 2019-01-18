@@ -78,24 +78,6 @@ public class RoboticsJsonUploadServiceTest {
         verify(ccdService, times(1)).updateCase(any(), any(), any(), any(), any(), any());
     }
 
-    @Test
-    public void willNotAttemptToUpdateCaseIfDocumentStoreIsDown() {
-
-        given(documentUploadClientApi.upload(eq(DUMMY_OAUTH_2_TOKEN), eq(DUMMY_SERVICE_AUTHORIZATION_TOKEN), anyString(), any()))
-                .willThrow(new RestClientException("Document store is down"));
-
-        SscsCaseData caseData = buildCaseData();
-        SscsCaseDetails caseDetails = convertCaseDetailsToSscsCaseDetails(buildCaseDetails());
-        service
-            .updateCaseWithRoboticsJson(
-                    roboticsJson,
-                    caseData,
-                    caseDetails,
-                    idamTokens);
-
-        verify(ccdService, never()).updateCase(any(), any(), any(), any(), any(), any());
-    }
-
     private UploadResponse createUploadResponse() {
         UploadResponse response = mock(UploadResponse.class);
         UploadResponse.Embedded embedded = mock(UploadResponse.Embedded.class);
