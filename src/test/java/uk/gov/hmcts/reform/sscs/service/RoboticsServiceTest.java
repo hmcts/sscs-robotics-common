@@ -43,6 +43,9 @@ public class RoboticsServiceTest {
     @Mock
     private RoboticsEmailTemplate roboticsEmailTemplate;
 
+    @Mock
+    private RoboticsJsonUploadService roboticsJsonUploadService;
+
     private RoboticsService service;
 
     @Captor
@@ -52,7 +55,13 @@ public class RoboticsServiceTest {
     public void setup() {
         initMocks(this);
 
-        service = new RoboticsService(airlookupService, emailService, roboticsJsonMapper, roboticsJsonValidator, roboticsEmailTemplate);
+        service = new RoboticsService(
+                airlookupService,
+                emailService,
+                roboticsJsonMapper,
+                roboticsJsonValidator,
+                roboticsEmailTemplate,
+                roboticsJsonUploadService);
     }
 
     @Test
@@ -163,7 +172,7 @@ public class RoboticsServiceTest {
     }
 
     @Test
-    public void generatingRoboticsStoresTheJson() {
+    public void generatingRoboticsReturnsTheJson() {
 
         SscsCaseData appeal = buildCaseData();
 
@@ -175,8 +184,8 @@ public class RoboticsServiceTest {
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
-        service.sendCaseToRobotics(appeal, 123L, "AB12 XYZ", null);
+        JSONObject roboticsJson = service.sendCaseToRobotics(appeal, 123L, "AB12 XYZ", null);
 
-        assertThat(service.getRoboticsJson(), is(mappedJson));
+        assertThat(roboticsJson, is(mappedJson));
     }
 }
