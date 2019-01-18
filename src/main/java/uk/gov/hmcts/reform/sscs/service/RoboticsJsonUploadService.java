@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.sscs.service;
 
 import static java.util.Collections.singletonList;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,7 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.document.DocumentUploadClientApi;
 import uk.gov.hmcts.reform.document.domain.UploadResponse;
-import uk.gov.hmcts.reform.sscs.ccd.domain.*;
+import uk.gov.hmcts.reform.sscs.ccd.domain.DocumentLink;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsDocument;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsDocumentDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.CcdService;
 import uk.gov.hmcts.reform.sscs.domain.pdf.ByteArrayMultipartFile;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
@@ -63,13 +67,8 @@ public class RoboticsJsonUploadService {
         if (null == updatedCaseData) {
             log.info("Case data for case {} was not updated with Robotics JSON document", caseDetails.getId());
         } else {
-            try {
-                ccdService.updateCase(updatedCaseData, caseDetails.getId(),
-                        "attachRoboticsJson", "", "", idamTokens);
-            } catch (Exception e) {
-                log.info("Failed to update ccd case with Robotics JSON but carrying on [" + caseDetails.getId() + "] ["
-                        + caseData.getCaseReference() + "]", e);
-            }
+            ccdService.updateCase(updatedCaseData, caseDetails.getId(),
+                    "attachRoboticsJson", "", "", idamTokens);
         }
 
     }
@@ -98,14 +97,8 @@ public class RoboticsJsonUploadService {
 
         String serviceAuthorization = authTokenGenerator.generate();
 
-        try {
-            return documentUploadClientApi
-                    .upload(S2S_TOKEN, serviceAuthorization, DM_STORE_USER_ID, files);
-        } catch (Exception e) {
-            log.info("Doc Store service failed to upload Robotics JSON, but carrying on", e);
-        }
-
-        return null;
+        return documentUploadClientApi
+                .upload(S2S_TOKEN, serviceAuthorization, DM_STORE_USER_ID, files);
     }
 
     private SscsDocument getRoboticsJsonDocument(DocumentLink documentLink) {
