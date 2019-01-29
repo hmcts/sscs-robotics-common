@@ -103,7 +103,12 @@ public class RoboticsService {
 
     private void addAdditionalEvidenceAttachments(Map<String, byte[]> additionalEvidence, List<EmailAttachment> attachments) {
         for (String filename : additionalEvidence.keySet()) {
-            attachments.add(file(additionalEvidence.get(filename), filename));
+            if (filename != null) {
+                byte[] content = additionalEvidence.get(filename);
+                if (content != null) {
+                    attachments.add(file(content, filename));
+                }
+            }
         }
     }
 

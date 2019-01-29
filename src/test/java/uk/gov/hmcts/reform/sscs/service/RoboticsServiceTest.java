@@ -172,6 +172,65 @@ public class RoboticsServiceTest {
     }
 
     @Test
+    public void givenAdditionalEvidenceHasEmptyFileName_doNotDownloadAdditionalEvidenceAndStillGenerateRoboticsAndSendEmail() {
+
+        SscsCaseData appeal = buildCaseData();
+
+        JSONObject mappedJson = mock(JSONObject.class);
+
+        given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
+
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+
+        given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
+
+        byte[] pdf = {};
+        byte[] someFile = {};
+
+        service.sendCaseToRobotics(appeal, 123L, "AB12 XYZ", pdf, Collections.singletonMap(null, someFile));
+
+        verify(roboticsEmailTemplate).generateEmail(eq("Bloggs_123"), captor.capture());
+        List<EmailAttachment> attachmentResult = captor.getValue();
+
+        assertThat(attachmentResult.size(), is(2));
+        assertThat(attachmentResult.get(0).getFilename(), is("Bloggs_123.txt"));
+        assertThat(attachmentResult.get(1).getFilename(), is("Bloggs_123.pdf"));
+
+        verify(roboticsJsonMapper).map(any());
+        verify(roboticsJsonValidator).validate(mappedJson);
+        verify(emailService).sendEmail(any());
+    }
+
+    @Test
+    public void givenAdditionalEvidenceFileIsEmpty_doNotDownloadAdditionalEvidenceAndStillGenerateRoboticsAndSendEmail() {
+
+        SscsCaseData appeal = buildCaseData();
+
+        JSONObject mappedJson = mock(JSONObject.class);
+
+        given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
+
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+
+        given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
+
+        byte[] pdf = {};
+
+        service.sendCaseToRobotics(appeal, 123L, "AB12 XYZ", pdf, Collections.singletonMap("Some Evidence.doc", null));
+
+        verify(roboticsEmailTemplate).generateEmail(eq("Bloggs_123"), captor.capture());
+        List<EmailAttachment> attachmentResult = captor.getValue();
+
+        assertThat(attachmentResult.size(), is(2));
+        assertThat(attachmentResult.get(0).getFilename(), is("Bloggs_123.txt"));
+        assertThat(attachmentResult.get(1).getFilename(), is("Bloggs_123.pdf"));
+
+        verify(roboticsJsonMapper).map(any());
+        verify(roboticsJsonValidator).validate(mappedJson);
+        verify(emailService).sendEmail(any());
+    }
+
+    @Test
     public void generatingRoboticsReturnsTheJson() {
 
         SscsCaseData appeal = buildCaseData();
