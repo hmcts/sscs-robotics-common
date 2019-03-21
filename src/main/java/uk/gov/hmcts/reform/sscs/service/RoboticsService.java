@@ -58,11 +58,11 @@ public class RoboticsService {
         JSONObject roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
                 .ccdCaseId(caseId).venueName(venue).evidencePresent(caseData.getEvidencePresent()).build());
 
-        log.info("Case {} Robotics JSON successfully created for Nino {} and benefit type {}", caseId, caseData.getAppeal().getAppellant().getIdentity().getNino(),
+        log.info("Case {} Robotics JSON successfully created for benefit type {}", caseId,
                 caseData.getAppeal().getBenefitType().getCode());
 
         sendJsonByEmail(caseData.getAppeal().getAppellant(), roboticsJson, pdf, additionalEvidence);
-        log.info("Case {} Robotics JSON email sent successfully Nino {} and benefit type {}", caseId, caseData.getAppeal().getAppellant().getIdentity().getNino(),
+        log.info("Case {} Robotics JSON email sent successfully for benefit type {}", caseId,
                 caseData.getAppeal().getBenefitType().getCode());
 
         return roboticsJson;
