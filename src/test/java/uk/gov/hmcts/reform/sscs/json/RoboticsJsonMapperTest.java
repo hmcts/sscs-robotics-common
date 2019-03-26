@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.sscs.json;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 import java.time.LocalDate;
@@ -43,7 +41,7 @@ public class RoboticsJsonMapperTest {
         roboticsJsonValidator.validate(roboticsJson);
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 15,
+                "If this fails, add an assertion below, do not just increment the number :)", 16,
                 roboticsJson.length()
         );
 
@@ -75,6 +73,23 @@ public class RoboticsJsonMapperTest {
         assertEquals("TN32 6PL", roboticsJson.getJSONObject("appellant").get("postCode"));
         assertEquals("01234567890", roboticsJson.getJSONObject("appellant").get("phoneNumber"));
         assertEquals("mail@email.com", roboticsJson.getJSONObject("appellant").get("email"));
+
+        assertEquals(
+                "If this fails, add an assertion below, do not just increment the number :)", 11,
+                roboticsJson.getJSONObject("appointee").length()
+        );
+
+        assertEquals("Mrs", roboticsJson.getJSONObject("appointee").get("title"));
+        assertEquals("April", roboticsJson.getJSONObject("appointee").get("firstName"));
+        assertEquals("Appointer", roboticsJson.getJSONObject("appointee").get("lastName"));
+        assertEquals("No", roboticsJson.getJSONObject("appointee").get("sameAddressAsAppellant"));
+        assertEquals("42 Appointed Mews", roboticsJson.getJSONObject("appointee").get("addressLine1"));
+        assertEquals("Apford", roboticsJson.getJSONObject("appointee").get("addressLine2"));
+        assertEquals("Apton", roboticsJson.getJSONObject("appointee").get("townOrCity"));
+        assertEquals("Appshire", roboticsJson.getJSONObject("appointee").get("county"));
+        assertEquals("AP12 4PA", roboticsJson.getJSONObject("appointee").get("postCode"));
+        assertEquals("07700 900555", roboticsJson.getJSONObject("appointee").get("phoneNumber"));
+        assertEquals("appointee@hmcts.net", roboticsJson.getJSONObject("appointee").get("email"));
 
         assertEquals(
                 "If this fails, add an assertion, do not just increment the number :)", 11,
@@ -295,6 +310,8 @@ public class RoboticsJsonMapperTest {
 
     @Test
     public void givenNoAppointee_thenProcessRobotics() {
+        appeal.getSscsCaseData().getAppeal().getAppellant().setAppointee(null);
+
         roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.has("appointee"));
