@@ -59,6 +59,23 @@ public class RoboticsJsonMapperTest {
         assertEquals("Online", roboticsJson.get("receivedVia"));
 
         assertEquals(
+                "If this fails, add an assertion below, do not just increment the number :)", 11,
+                roboticsJson.getJSONObject("appointee").length()
+        );
+
+        assertEquals("Mrs", roboticsJson.getJSONObject("appointee").get("title"));
+        assertEquals("April", roboticsJson.getJSONObject("appointee").get("firstName"));
+        assertEquals("Appointer", roboticsJson.getJSONObject("appointee").get("lastName"));
+        assertEquals("No", roboticsJson.getJSONObject("appointee").get("sameAddressAsAppellant"));
+        assertEquals("Apton", roboticsJson.getJSONObject("appointee").get("townOrCity"));
+        assertEquals("07700 900555", roboticsJson.getJSONObject("appointee").get("phoneNumber"));
+        assertEquals("Appshire", roboticsJson.getJSONObject("appointee").get("county"));
+        assertEquals("42 Appointed Mews", roboticsJson.getJSONObject("appointee").get("addressLine1"));
+        assertEquals("Apford", roboticsJson.getJSONObject("appointee").get("addressLine2"));
+        assertEquals("AP12 4PA", roboticsJson.getJSONObject("appointee").get("postCode"));
+        assertEquals("appointee@hmcts.net", roboticsJson.getJSONObject("appointee").get("email"));
+
+        assertEquals(
                 "If this fails, add an assertion below, do not just increment the number :)", 10,
                 roboticsJson.getJSONObject("appellant").length()
         );
