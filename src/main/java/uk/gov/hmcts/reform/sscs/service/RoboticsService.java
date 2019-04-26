@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonMapper;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonValidator;
+import uk.gov.hmcts.reform.sscs.model.AirlookupBenefitToVenue;
 
 @Service
 @Slf4j
@@ -53,10 +54,12 @@ public class RoboticsService {
     }
 
     public JSONObject sendCaseToRobotics(SscsCaseData caseData, Long caseId, String postcode, byte[] pdf, Map<String, byte[]> additionalEvidence) {
-        String venue = airLookupService.lookupAirVenueNameByPostCode(postcode);
+        AirlookupBenefitToVenue venue = airLookupService.lookupAirVenueNameByPostCode(postcode);
+
+        String venueName = caseData.getAppeal().getBenefitType().getCode().toLowerCase().equals("esa") ? venue.getEsaVenue() : venue.getPipVenue();
 
         JSONObject roboticsJson = createRobotics(RoboticsWrapper.builder().sscsCaseData(caseData)
-                .ccdCaseId(caseId).venueName(venue).evidencePresent(caseData.getEvidencePresent()).build());
+                .ccdCaseId(caseId).venueName(venueName).evidencePresent(caseData.getEvidencePresent()).build());
 
         log.info("Case {} Robotics JSON successfully created for benefit type {}", caseId,
                 caseData.getAppeal().getBenefitType().getCode());

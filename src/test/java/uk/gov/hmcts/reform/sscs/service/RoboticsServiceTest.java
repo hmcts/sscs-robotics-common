@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sscs.domain.email.RoboticsEmailTemplate;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonMapper;
 import uk.gov.hmcts.reform.sscs.json.RoboticsJsonValidator;
+import uk.gov.hmcts.reform.sscs.model.AirlookupBenefitToVenue;
 
 public class RoboticsServiceTest {
 
@@ -95,7 +96,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
@@ -124,7 +125,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
@@ -149,7 +150,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
@@ -180,7 +181,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
@@ -210,7 +211,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
@@ -239,7 +240,7 @@ public class RoboticsServiceTest {
 
         given(roboticsJsonMapper.map(any())).willReturn(mappedJson);
 
-        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn("Bristol");
+        given(airlookupService.lookupAirVenueNameByPostCode("AB12 XYZ")).willReturn(AirlookupBenefitToVenue.builder().pipVenue("Bristol").build());
 
         given(emailService.generateUniqueEmailId(appeal.getAppeal().getAppellant())).willReturn("Bloggs_123");
 
