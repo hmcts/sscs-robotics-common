@@ -111,7 +111,7 @@ bintray {
 dependencies {
     compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: '5.0.1'
     compile group: 'org.springframework', name: 'spring-context-support', version: '5.1.6.RELEASE'
-    compile group: 'org.springframework', name: 'spring-web', version: '5.1.6.RELEASE'
+    compile group: 'org.springframework', name: 'spring-web', version: '5.1.7.RELEASE'
     compile group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.11.1'
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
     compile group: 'uk.gov.hmcts.reform', name: 'sscs-pdf-email-common', version: '1.0.5'
