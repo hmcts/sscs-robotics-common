@@ -24,6 +24,7 @@
     "appellant": {"$ref": "#/definitions/person"},
     "appointee": {"$ref": "#/definitions/person"},
     "representative": {"$ref": "#/definitions/person"},
+    "rpcEmail": {"type": "string"},
     "hearingArrangements": {
       "type": "object",
       "properties" : {

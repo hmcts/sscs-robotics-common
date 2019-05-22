@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sscs.ccd.domain.*;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
@@ -15,6 +17,13 @@ public class RoboticsJsonMapper {
     private static final String YES = "Yes";
     private static final String ESA_CASE_CODE = "051DD";
     private static final String PIP_CASE_CODE = "002DD";
+
+    private Boolean rpcEmailRoboticsFeature;
+
+    @Autowired
+    public RoboticsJsonMapper(@Value("${feature.rpc_email_robotics}") Boolean rpcEmailRoboticsFeature) {
+        this.rpcEmailRoboticsFeature = rpcEmailRoboticsFeature;
+    }
 
     public JSONObject map(RoboticsWrapper roboticsWrapper) {
 
@@ -43,6 +52,10 @@ public class RoboticsJsonMapper {
             }
         }
 
+        if (rpcEmailRoboticsFeature && sscsCaseData.getRegionalProcessingCenter() != null && sscsCaseData.getRegionalProcessingCenter().getEmail() != null) {
+            obj.put("rpcEmail", sscsCaseData.getRegionalProcessingCenter().getEmail());
+        }
+
         return obj;
     }
 
@@ -61,6 +74,7 @@ public class RoboticsJsonMapper {
                 obj.put("mrnReasonForBeingLate", appeal.getMrnDetails().getMrnLateReason());
             }
         }
+
 
         if (appeal.getMrnDetails().getDwpIssuingOffice() != null) {
             obj.put("pipNumber", appeal.getMrnDetails().getDwpIssuingOffice());

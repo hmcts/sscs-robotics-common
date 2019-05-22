@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
 @RunWith(JUnitParamsRunner.class)
 public class RoboticsJsonMapperTest {
-    private RoboticsJsonMapper roboticsJsonMapper = new RoboticsJsonMapper();
+    private RoboticsJsonMapper roboticsJsonMapper = new RoboticsJsonMapper(false);
     private RoboticsWrapper appeal;
     private RoboticsJsonValidator roboticsJsonValidator = new RoboticsJsonValidator(
             "/schema/sscs-robotics.json");
@@ -57,6 +57,7 @@ public class RoboticsJsonMapperTest {
         assertEquals("Mr User Test", roboticsJson.get("hearingRequestParty"));
         assertEquals("Yes", roboticsJson.get("evidencePresent"));
         assertEquals("Online", roboticsJson.get("receivedVia"));
+        assertFalse(roboticsJson.has("rpcEmail"));
 
         assertEquals(
                 "If this fails, add an assertion below, do not just increment the number :)", 11,
@@ -332,5 +333,14 @@ public class RoboticsJsonMapperTest {
         roboticsJson = roboticsJsonMapper.map(appeal);
 
         assertFalse(roboticsJson.has("appointee"));
+    }
+
+    @Test
+    public void givenRpcEmailRoboticsFeatureIsEnabled_thenAddRpcEmailToJson() {
+        roboticsJsonMapper = new RoboticsJsonMapper(true);
+
+        roboticsJson = roboticsJsonMapper.map(appeal);
+
+        assertEquals("Cardiff_SYA_Respon@justice.gov.uk", roboticsJson.get("rpcEmail"));
     }
 }
