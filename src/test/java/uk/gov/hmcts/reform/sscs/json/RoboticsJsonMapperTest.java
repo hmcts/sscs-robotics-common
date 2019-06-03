@@ -70,6 +70,7 @@ public class RoboticsJsonMapperTest {
         assertEquals("Online", roboticsJson.get("receivedVia"));
         if (rpcEmailFeature != null && rpcEmailFeature) {
             assertTrue(roboticsJson.has("rpcEmail"));
+            assertEquals("Cardiff_SYA_Respon@justice.gov.uk", roboticsJson.get("rpcEmail"));
         } else {
             assertFalse(roboticsJson.has("rpcEmail"));
         }
@@ -350,12 +351,4 @@ public class RoboticsJsonMapperTest {
         assertFalse(roboticsJson.has("appointee"));
     }
 
-    @Test
-    public void givenRpcEmailRoboticsFeatureIsEnabled_thenAddRpcEmailToJson() {
-        roboticsJsonMapper = new RoboticsJsonMapper(true);
-
-        roboticsJson = roboticsJsonMapper.map(appeal);
-
-        assertEquals("Cardiff_SYA_Respon@justice.gov.uk", roboticsJson.get("rpcEmail"));
-    }
 }
