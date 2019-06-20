@@ -1,1 +1,1 @@
-feature.rpc_email_robotics: false
+feature.rpc_email_robotics: ${FEATURE_RPC_EMAIL_ROBOTICS:false}
