@@ -1,48 +1,59 @@
 package uk.gov.hmcts.reform.sscs.json;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.Assert;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import junitparams.converters.Nullable;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.hmcts.reform.sscs.ccd.domain.*;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Contact;
+import uk.gov.hmcts.reform.sscs.ccd.domain.DateRange;
+import uk.gov.hmcts.reform.sscs.ccd.domain.ExcludeDate;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Identity;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Name;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
 @RunWith(JUnitParamsRunner.class)
 public class RoboticsJsonMapperTest {
-    private RoboticsJsonMapper roboticsJsonMapper = new RoboticsJsonMapper();
+    private RoboticsJsonMapper roboticsJsonMapper = new RoboticsJsonMapper(false);
     private RoboticsWrapper appeal;
     private RoboticsJsonValidator roboticsJsonValidator = new RoboticsJsonValidator(
-            "/schema/sscs-robotics.json");
+        "/schema/sscs-robotics.json");
     private JSONObject roboticsJson;
 
     @Before
     public void setup() {
         appeal = RoboticsWrapper
-                .builder()
-                .sscsCaseData(buildCaseData())
-                .ccdCaseId(123L).venueName("Bromley").evidencePresent("Yes")
-                .build();
+            .builder()
+            .sscsCaseData(buildCaseData())
+            .ccdCaseId(123L).venueName("Bromley").evidencePresent("Yes")
+            .build();
     }
 
     @Test
-    public void mapsAppealToRoboticsJson() {
+    @Parameters({"true, 17", "false, 16", "null, 16"})
+    public void mapsAppealToRoboticsJson(@Nullable Boolean rpcEmailFeature, int expectedJsonLength) {
+        roboticsJsonMapper = new RoboticsJsonMapper(rpcEmailFeature);
         roboticsJson = roboticsJsonMapper.map(appeal);
 
         roboticsJsonValidator.validate(roboticsJson);
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 16,
-                roboticsJson.length()
+            "If this fails, add an assertion below, do not just increment the number :)", expectedJsonLength,
+            roboticsJson.length()
         );
 
         assertEquals("002DD", roboticsJson.get("caseCode"));
@@ -57,10 +68,16 @@ public class RoboticsJsonMapperTest {
         assertEquals("Mr User Test", roboticsJson.get("hearingRequestParty"));
         assertEquals("Yes", roboticsJson.get("evidencePresent"));
         assertEquals("Online", roboticsJson.get("receivedVia"));
+        if (rpcEmailFeature != null && rpcEmailFeature) {
+            assertTrue(roboticsJson.has("rpcEmail"));
+            assertEquals("Cardiff_SYA_Respon@justice.gov.uk", roboticsJson.get("rpcEmail"));
+        } else {
+            assertFalse(roboticsJson.has("rpcEmail"));
+        }
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 11,
-                roboticsJson.getJSONObject("appointee").length()
+            "If this fails, add an assertion below, do not just increment the number :)", 11,
+            roboticsJson.getJSONObject("appointee").length()
         );
 
         assertEquals("Mrs", roboticsJson.getJSONObject("appointee").get("title"));
@@ -76,8 +93,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("appointee@hmcts.net", roboticsJson.getJSONObject("appointee").get("email"));
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 10,
-                roboticsJson.getJSONObject("appellant").length()
+            "If this fails, add an assertion below, do not just increment the number :)", 10,
+            roboticsJson.getJSONObject("appellant").length()
         );
 
         assertEquals("Mr", roboticsJson.getJSONObject("appellant").get("title"));
@@ -92,8 +109,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("mail@email.com", roboticsJson.getJSONObject("appellant").get("email"));
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 11,
-                roboticsJson.getJSONObject("appointee").length()
+            "If this fails, add an assertion below, do not just increment the number :)", 11,
+            roboticsJson.getJSONObject("appointee").length()
         );
 
         assertEquals("Mrs", roboticsJson.getJSONObject("appointee").get("title"));
@@ -109,8 +126,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("appointee@hmcts.net", roboticsJson.getJSONObject("appointee").get("email"));
 
         assertEquals(
-                "If this fails, add an assertion, do not just increment the number :)", 11,
-                roboticsJson.getJSONObject("representative").length()
+            "If this fails, add an assertion, do not just increment the number :)", 11,
+            roboticsJson.getJSONObject("representative").length()
         );
 
         assertEquals("Mrs", roboticsJson.getJSONObject("representative").get("title"));
@@ -126,8 +143,8 @@ public class RoboticsJsonMapperTest {
         assertEquals("mail@email.com", roboticsJson.getJSONObject("representative").get("email"));
 
         assertEquals(
-                "If this fails, add an assertion below, do not just increment the number :)", 6,
-                roboticsJson.getJSONObject("hearingArrangements").length()
+            "If this fails, add an assertion below, do not just increment the number :)", 6,
+            roboticsJson.getJSONObject("hearingArrangements").length()
         );
 
         assertEquals("Spanish", roboticsJson.getJSONObject("hearingArrangements").get("languageInterpreter"));
@@ -191,13 +208,13 @@ public class RoboticsJsonMapperTest {
     @Test
     public void givenHearingArrangementIsNull_thenSetToExcludeDatesHearingLoopAndAccHearingRoom() {
         DateRange dateRange1 = DateRange.builder()
-                .start("2018-06-30")
-                .end("2018-06-30")
-                .build();
+            .start("2018-06-30")
+            .end("2018-06-30")
+            .build();
         List<ExcludeDate> excludeDates = new ArrayList<>();
         excludeDates.add(ExcludeDate.builder()
-                .value(dateRange1)
-                .build());
+            .value(dateRange1)
+            .build());
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(null);
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setExcludeDates(excludeDates);
 
@@ -291,10 +308,10 @@ public class RoboticsJsonMapperTest {
         Name appointeeName = Name.builder().title("Mrs").firstName("Ap").lastName("Pointee").build();
 
         Appointee appointee = Appointee.builder()
-                .name(appointeeName)
-                .address(appeal.getSscsCaseData().getAppeal().getAppellant().getAddress())
-                .contact(appeal.getSscsCaseData().getAppeal().getAppellant().getContact())
-                .build();
+            .name(appointeeName)
+            .address(appeal.getSscsCaseData().getAppeal().getAppellant().getAddress())
+            .contact(appeal.getSscsCaseData().getAppeal().getAppellant().getContact())
+            .build();
 
         appeal.getSscsCaseData().getAppeal().getAppellant().setIsAddressSameAsAppointee("Yes");
 
@@ -302,7 +319,7 @@ public class RoboticsJsonMapperTest {
 
         roboticsJson = roboticsJsonMapper.map(appeal);
 
-        Assert.assertTrue(roboticsJson.has("appointee"));
+        assertTrue(roboticsJson.has("appointee"));
         assertEquals("Yes", roboticsJson.getJSONObject("appointee").getString("sameAddressAsAppellant"));
     }
 
@@ -311,11 +328,11 @@ public class RoboticsJsonMapperTest {
         Name appointeeName = Name.builder().title(null).firstName(null).lastName(null).build();
 
         Appointee appointee = Appointee.builder()
-                .name(appointeeName)
-                .address(Address.builder().line1(null).line2(null).town(null).county(null).postcode(null).build())
-                .contact(Contact.builder().email(null).phone(null).mobile(null).build())
-                .identity(Identity.builder().dob(null).nino(null).build())
-                .build();
+            .name(appointeeName)
+            .address(Address.builder().line1(null).line2(null).town(null).county(null).postcode(null).build())
+            .contact(Contact.builder().email(null).phone(null).mobile(null).build())
+            .identity(Identity.builder().dob(null).nino(null).build())
+            .build();
 
         appeal.getSscsCaseData().getAppeal().getAppellant().setAppointee(appointee);
 
@@ -333,4 +350,5 @@ public class RoboticsJsonMapperTest {
 
         assertFalse(roboticsJson.has("appointee"));
     }
+
 }

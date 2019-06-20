@@ -5,8 +5,21 @@ import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sscs.ccd.domain.*;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appeal;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appellant;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Contact;
+import uk.gov.hmcts.reform.sscs.ccd.domain.ExcludeDate;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOptions;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Identity;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Name;
+import uk.gov.hmcts.reform.sscs.ccd.domain.RegionalProcessingCenter;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Representative;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.domain.robotics.RoboticsWrapper;
 
 @Component
@@ -15,6 +28,13 @@ public class RoboticsJsonMapper {
     private static final String YES = "Yes";
     private static final String ESA_CASE_CODE = "051DD";
     private static final String PIP_CASE_CODE = "002DD";
+
+    private Boolean rpcEmailRoboticsFeature;
+
+    @Autowired
+    public RoboticsJsonMapper(@Value("${feature.rpc_email_robotics}") Boolean rpcEmailRoboticsFeature) {
+        this.rpcEmailRoboticsFeature = rpcEmailRoboticsFeature;
+    }
 
     public JSONObject map(RoboticsWrapper roboticsWrapper) {
 
@@ -43,7 +63,15 @@ public class RoboticsJsonMapper {
             }
         }
 
+        addRpcEmail(sscsCaseData.getRegionalProcessingCenter(), obj);
+
         return obj;
+    }
+
+    private void addRpcEmail(RegionalProcessingCenter rpc, JSONObject obj) {
+        if (rpcEmailRoboticsFeature != null && rpcEmailRoboticsFeature && rpc != null && rpc.getEmail() != null) {
+            obj.put("rpcEmail", rpc.getEmail());
+        }
     }
 
     private static JSONObject buildAppealDetails(JSONObject obj, Appeal appeal, String venueName) {
@@ -61,6 +89,7 @@ public class RoboticsJsonMapper {
                 obj.put("mrnReasonForBeingLate", appeal.getMrnDetails().getMrnLateReason());
             }
         }
+
 
         if (appeal.getMrnDetails().getDwpIssuingOffice() != null) {
             obj.put("pipNumber", appeal.getMrnDetails().getDwpIssuingOffice());
@@ -149,7 +178,7 @@ public class RoboticsJsonMapper {
         }
 
         if (hearingOptions.getExcludeDates() != null
-                && hearingOptions.getExcludeDates().size() > 0) {
+            && hearingOptions.getExcludeDates().size() > 0) {
             JSONArray datesCantAttendArray = new JSONArray();
             for (ExcludeDate a : hearingOptions.getExcludeDates()) {
                 // Assume start and end date are always the same
@@ -180,39 +209,39 @@ public class RoboticsJsonMapper {
 
     private Boolean isAppointeeDetailsEmpty(Appointee appointee) {
         return appointee == null
-                || (isAddressEmpty(appointee.getAddress())
-                && isContactEmpty(appointee.getContact())
-                && isIdentityEmpty(appointee.getIdentity())
-                && isNameEmpty(appointee.getName()));
+            || (isAddressEmpty(appointee.getAddress())
+            && isContactEmpty(appointee.getContact())
+            && isIdentityEmpty(appointee.getIdentity())
+            && isNameEmpty(appointee.getName()));
     }
 
     private Boolean isAddressEmpty(Address address) {
         return address == null
-                || (address.getLine1() == null
-                && address.getLine2() == null
-                && address.getTown() == null
-                && address.getCounty() == null
-                && address.getPostcode() == null);
+            || (address.getLine1() == null
+            && address.getLine2() == null
+            && address.getTown() == null
+            && address.getCounty() == null
+            && address.getPostcode() == null);
     }
 
     private Boolean isContactEmpty(Contact contact) {
         return contact == null
-                || (contact.getEmail() == null
-                && contact.getPhone() == null
-                && contact.getMobile() == null);
+            || (contact.getEmail() == null
+            && contact.getPhone() == null
+            && contact.getMobile() == null);
     }
 
     private Boolean isIdentityEmpty(Identity identity) {
         return identity == null
-                || (identity.getDob() == null
-                && identity.getNino() == null);
+            || (identity.getDob() == null
+            && identity.getNino() == null);
     }
 
     private Boolean isNameEmpty(Name name) {
         return name == null
-                || (name.getFirstName() == null
-                && name.getLastName() == null
-                && name.getTitle() == null);
+            || (name.getFirstName() == null
+            && name.getLastName() == null
+            && name.getTitle() == null);
     }
 
     private static String convertBooleanToYesNo(Boolean value) {
