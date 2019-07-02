@@ -226,6 +226,34 @@ public class RoboticsJsonMapperTest {
     }
 
     @Test
+    public void givenHearingArrangementIsNull_whenEmptyExcludedDate() {
+        DateRange dateRange1 = DateRange.builder()
+            .start("2018-06-30")
+            .end("2018-06-30")
+            .build();
+        DateRange dateRange2 = DateRange.builder()
+            .start("")
+            .end("")
+            .build();
+        List<ExcludeDate> excludeDates = new ArrayList<>();
+        excludeDates.add(ExcludeDate.builder()
+            .value(dateRange1)
+            .build());
+        excludeDates.add(ExcludeDate.builder()
+            .value(dateRange2)
+            .build());
+        appeal.getSscsCaseData().getAppeal().getHearingOptions().setArrangements(null);
+        appeal.getSscsCaseData().getAppeal().getHearingOptions().setExcludeDates(excludeDates);
+
+        roboticsJson = roboticsJsonMapper.map(appeal);
+
+        assertEquals("No", roboticsJson.getJSONObject("hearingArrangements").get("hearingLoop"));
+        assertEquals("No", roboticsJson.getJSONObject("hearingArrangements").get("accessibleHearingRoom"));
+        assertEquals(1, roboticsJson.getJSONObject("hearingArrangements").getJSONArray("datesCantAttend").length());
+        assertEquals("2018-06-30", roboticsJson.getJSONObject("hearingArrangements").getJSONArray("datesCantAttend").get(0));
+    }
+
+    @Test
     public void givenLanguageInterpreterIsFalse_thenDoNotSetLanguageInterpreter() {
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguages("My Language");
         appeal.getSscsCaseData().getAppeal().getHearingOptions().setLanguageInterpreter("No");

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sscs.json;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
@@ -181,8 +183,10 @@ public class RoboticsJsonMapper {
             && hearingOptions.getExcludeDates().size() > 0) {
             JSONArray datesCantAttendArray = new JSONArray();
             for (ExcludeDate a : hearingOptions.getExcludeDates()) {
-                // Assume start and end date are always the same
-                datesCantAttendArray.add(getLocalDate(a.getValue().getStart()));
+                if (!isBlank(a.getValue().getStart())) {
+                    // Assume start and end date are always the same
+                    datesCantAttendArray.add(getLocalDate(a.getValue().getStart()));
+                }
             }
 
             hearingArrangements.put("datesCantAttend", datesCantAttendArray);
