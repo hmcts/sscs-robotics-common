@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.sscs.service;
 
+import static org.apache.commons.lang3.StringUtils.*;
 import static uk.gov.hmcts.reform.sscs.domain.email.EmailAttachment.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.sscs.model.AirlookupBenefitToVenue;
 @Slf4j
 public class RoboticsService {
 
+    private static final String GLASGOW = "GLASGOW";
     private final AirLookupService airLookupService;
     private final EmailService emailService;
     private final RoboticsJsonMapper roboticsJsonMapper;
@@ -64,9 +64,10 @@ public class RoboticsService {
         log.info("Case {} Robotics JSON successfully created for benefit type {}", caseId,
                 caseData.getAppeal().getBenefitType().getCode());
 
-        sendJsonByEmail(caseData.getAppeal().getAppellant(), roboticsJson, pdf, additionalEvidence);
-        log.info("Case {} Robotics JSON email sent successfully for benefit type {}", caseId,
-                caseData.getAppeal().getBenefitType().getCode());
+        boolean isScottish = Optional.ofNullable(caseData.getRegionalProcessingCenter()).map(f -> equalsIgnoreCase(f.getName(), GLASGOW)).orElse(false);
+        sendJsonByEmail(caseData.getAppeal().getAppellant(), roboticsJson, pdf, additionalEvidence, isScottish);
+        log.info("Case {} Robotics JSON email sent successfully for benefit type {} isScottish {}", caseId,
+                caseData.getAppeal().getBenefitType().getCode(), isScottish);
 
         return roboticsJson;
     }
@@ -95,14 +96,15 @@ public class RoboticsService {
         }
     }
 
-    private void sendJsonByEmail(Appellant appellant, JSONObject json, byte[] pdf, Map<String, byte[]> additionalEvidence) {
+    private void sendJsonByEmail(Appellant appellant, JSONObject json, byte[] pdf, Map<String, byte[]> additionalEvidence, boolean isScottish) {
         String appellantUniqueId = emailService.generateUniqueEmailId(appellant);
         List<EmailAttachment> attachments = addDefaultAttachment(json, pdf, appellantUniqueId);
         addAdditionalEvidenceAttachments(additionalEvidence, attachments);
         emailService.sendEmail(
                 roboticsEmailTemplate.generateEmail(
                         appellantUniqueId,
-                        attachments
+                        attachments,
+                        isScottish
                 )
         );
     }
