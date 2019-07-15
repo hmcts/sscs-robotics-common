@@ -97,9 +97,13 @@ public class RoboticsService {
     }
 
     private void sendJsonByEmail(Appellant appellant, JSONObject json, byte[] pdf, Map<String, byte[]> additionalEvidence, boolean isScottish) {
+        log.info("Generating unique email id");
         String appellantUniqueId = emailService.generateUniqueEmailId(appellant);
+        log.info("Add default attachments");
         List<EmailAttachment> attachments = addDefaultAttachment(json, pdf, appellantUniqueId);
+        log.info("Add additional evidence");
         addAdditionalEvidenceAttachments(additionalEvidence, attachments);
+        log.info("Send email");
         emailService.sendEmail(
                 roboticsEmailTemplate.generateEmail(
                         appellantUniqueId,
